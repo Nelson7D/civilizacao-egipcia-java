@@ -6,24 +6,46 @@ import com.game.core.Recurso;
 import com.game.map.MapaDoJogo;
 
 public class Trabalhador extends Unidade {
-    private static final int VELOCIDADE_COLETA = 10;
+    private MapaDoJogo mapa;
+    private Jogador jogador;
+
+    // Estado de movimento
     private boolean emMovimento = false;
-    private int destinoX;
-    private int destinoY;
+    private int destinoX, destinoY;
 
     // Estado da ação (movendo, coletando, parado)
     private EstadoAcao estadoAtual = EstadoAcao.PARADO;
-
-    public Trabalhador(int x, int y) {
-        super(x, y); // Assume que a classe Unidade tem um construtor com x e y
-        this.saude = 50;
-        this.velocidade = 2;
-        this.ataque = 0;
-    }
-
-    // Enum para estados de ação
     private enum EstadoAcao {
         MOVENDO, COLETANDO, PARADO
+    }
+
+    // Constante para coleta de recursos
+    private static final int VELOCIDADE_COLETA = 10;
+
+    public Trabalhador(int x, int y, MapaDoJogo mapa, Jogador jogador) {
+        super(x, y,50,2,0);
+        this.mapa = mapa;
+        this.jogador = jogador;
+    }
+
+    @Override
+    public void performAction() {
+        // Exemplo: Coletar recursos automaticamente se estiver em célula válida
+        Celula celulaAtual = mapa.getCelula(x, y);
+        if (celulaAtual != null && celulaAtual.getRecurso() != null) {
+            coletarRecursos(celulaAtual, jogador);
+        }
+    }
+
+    @Override
+    public void mover(int newX, int newY) {
+        // Implementação realista (ex: verificar colisões)
+        if (mapa.estaDentroDosLimites(newX, newY) && !mapa.getCelula(newX, newY).isOcupada()) {
+            mapa.getCelula(x, y).setOcupada(false);
+            this.x = newX;
+            this.y = newY;
+            mapa.getCelula(x, y).setOcupada(true);
+        }
     }
 
     // Método para definir destino e iniciar movimento
@@ -38,7 +60,6 @@ public class Trabalhador extends Unidade {
             System.out.println("Célula ocupada!");
             return;
         }
-
         this.destinoX = destinoX;
         this.destinoY = destinoY;
         this.emMovimento = true;
@@ -49,26 +70,29 @@ public class Trabalhador extends Unidade {
     public void atualizarPosicao(MapaDoJogo mapa) {
         if (!emMovimento) return;
 
-        int dx = Integer.compare(destinoX, x);
-        int dy = Integer.compare(destinoY, y);
-
-        // Verifica se pode se mover para a próxima célula
-        int novoX = x + dx;
-        int novoY = y + dy;
-
-        if (mapa.estaDentroDosLimites(novoX, novoY) && !mapa.getCelula(novoX, novoY).isOcupada()) {
-            // Libera a célula atual e ocupa a nova
-            mapa.getCelula(x, y).setOcupada(false);
-            x = novoX;
-            y = novoY;
-            mapa.getCelula(x, y).setOcupada(true);
+        // Movimento em eixos separados (horizontal primeiro, depois vertical)
+        if (x != destinoX) {
+            int dx = Integer.compare(destinoX, x);
+            int novoX = x + dx;
+            if (mapa.estaDentroDosLimites(novoX, y) && !mapa.getCelula(novoX, y).isOcupada()) {
+                mapa.getCelula(x, y).setOcupada(false);
+                x = novoX;
+                mapa.getCelula(x, y).setOcupada(true);
+            }
+        } else if (y != destinoY) {
+            int dy = Integer.compare(destinoY, y);
+            int novoY = y + dy;
+            if (mapa.estaDentroDosLimites(x, novoY) && !mapa.getCelula(x, novoY).isOcupada()) {
+                mapa.getCelula(x, y).setOcupada(false);
+                y = novoY;
+                mapa.getCelula(x, y).setOcupada(true);
+            }
         }
 
         // Verifica se chegou ao destino
         if (x == destinoX && y == destinoY) {
             emMovimento = false;
-            estadoAtual = EstadoAcao.PARADO;
-            realizarAcaoAutomatica(mapa); // Coleta recursos ao chegar
+            realizarAcaoAutomatica(mapa);
         }
     }
 
@@ -83,8 +107,6 @@ public class Trabalhador extends Unidade {
 
     // Método de coleta ajustado
     public void coletarRecursos(Celula celula, Jogador jogador) {
-        if (celula == null || estadoAtual != EstadoAcao.COLETANDO) return;
-
         Recurso recurso = celula.getRecurso();
         if (recurso == null) return;
 
@@ -100,4 +122,19 @@ public class Trabalhador extends Unidade {
     // Getters para estados (útil para interface gráfica)
     public boolean estaMovendo() { return emMovimento; }
     public boolean estaColetando() { return estadoAtual == EstadoAcao.COLETANDO; }
+
+    @Override
+    public Recurso getRecursoNecessario() {
+        return Recurso.COMIDA;
+    }
+
+    @Override
+    public int getCustoRecurso() {
+        return 50; // Custo de criação do trabalhador
+    }
+
+    @Override
+    public int getCustoPopulacao() {
+        return 1; // Custo populacional do trabalhador
+    }
 }
