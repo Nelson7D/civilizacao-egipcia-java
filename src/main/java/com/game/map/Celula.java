@@ -44,7 +44,7 @@ public class Celula {
             case FLORESTA -> Color.DARKGREEN;
             case PEDREIRA -> Color.GRAY;
             case RIO -> Color.BLUE;
-            case DESERTO -> Color.color(194, 178, 128);
+            case DESERTO -> Color.rgb(194, 178, 128);
         };
     }
 

@@ -6,73 +6,79 @@ import com.game.units.Unidade;
 import java.util.Random;
 
 public class MapaDoJogo {
-    private static final int LARGURA = 150;
-    private static final int ALTURA = 150;
+    private static final int LARGURA = 50;
+    private static final int ALTURA = 50;
     private Celula[][] grade;
     private Random random;
 
     public MapaDoJogo() {
         this.grade = new Celula[LARGURA][ALTURA];
         this.random = new Random();
-        gerarMapaAleatorio();
+        gerarMapaRealista();
     }
 
-    private void gerarMapaAleatorio() {
+    private void gerarMapaRealista() {
+        // Inicializa tudo como deserto
         for (int x = 0; x < LARGURA; x++) {
             for (int y = 0; y < ALTURA; y++) {
-               grade[x][y] = new Celula(TipoTerreno.DESERTO, null, 0);
+                grade[x][y] = new Celula(TipoTerreno.DESERTO, null, 0);
             }
         }
 
-        // Adiciona florestas agrupadas
-        gerarRegiaoAgrupada(TipoTerreno.FLORESTA, Recurso.MADEIRA, 5);
-
-        // Adiciona pedreiras agrupadas
-        gerarRegiaoAgrupada(TipoTerreno.PEDREIRA, Recurso.PEDRA, 4);
-
-        // Adiciona terra fértil agrupada
-        gerarRegiaoAgrupada(TipoTerreno.TERRA_FERTIL, Recurso.COMIDA, 6);
+        // Adiciona florestas, pedreiras e terras férteis agrupadas
+        adicionarRegiaoAgrupada(TipoTerreno.FLORESTA, Recurso.MADEIRA, 5);
+        adicionarRegiaoAgrupada(TipoTerreno.PEDREIRA, Recurso.PEDRA, 4);
+        adicionarRegiaoAgrupada(TipoTerreno.TERRA_FERTIL, Recurso.COMIDA, 6);
 
         // Adiciona um rio/lago
-        gerarRio();
+        gerarCursoDeAgua();
     }
 
-    private void gerarRegiaoAgrupada(TipoTerreno terreno, Recurso recurso, int tamanhoMaximo) {
+    private void adicionarRegiaoAgrupada(TipoTerreno terreno, Recurso recurso, int tamanhoMaximo) {
         int quantidadeRegioes = random.nextInt(3) + 1; // 1 a 3 regiões
         for (int i = 0; i < quantidadeRegioes; i++) {
-            int xInicial = random.nextInt(LARGURA);
-            int yInicial = random.nextInt(ALTURA);
+            int xInicial = random.nextInt(LARGURA/2);
+            int yInicial = random.nextInt(ALTURA/2);
             expandirRegiao(xInicial, yInicial, terreno, recurso, tamanhoMaximo);
         }
     }
 
-    private void expandirRegiao(int x, int y, TipoTerreno terreno, Recurso recurso, int tamanhoMaximo) {
-        if (!estaDentroDosLimites(x, y) || grade[x][y].getTerreno() != TipoTerreno.DESERTO) {
+    private void expandirRegiao(int x, int y, TipoTerreno terreno, Recurso recurso, int tamanhoRestante) {
+        if (!estaDentroDosLimites(x, y) || tamanhoRestante <= 0 || grade[x][y].getTerreno() != TipoTerreno.DESERTO) {
             return;
         }
+
         grade[x][y] = new Celula(terreno, recurso, random.nextInt(100) + 50);
-        if (random.nextInt(tamanhoMaximo) > 0) {
-            expandirRegiao(x + 1, y, terreno, recurso, tamanhoMaximo - 1);
-            expandirRegiao(x - 1, y, terreno, recurso, tamanhoMaximo - 1);
-            expandirRegiao(x, y + 1, terreno, recurso, tamanhoMaximo - 1);
-            expandirRegiao(x, y - 1, terreno, recurso, tamanhoMaximo - 1);
-        }
+
+        expandirRegiao(x + 1, y, terreno, recurso, tamanhoRestante - 1);
+        expandirRegiao(x - 1, y, terreno, recurso, tamanhoRestante - 1);
+        expandirRegiao(x, y + 1, terreno, recurso, tamanhoRestante - 1);
+        expandirRegiao(x, y - 1, terreno, recurso, tamanhoRestante - 1);
     }
 
-    private void gerarRio() {
-        int xInicial = random.nextInt(LARGURA / 2) + LARGURA / 4; // Centralizado
+    private void gerarCursoDeAgua() {
+        int xInicial = random.nextInt(LARGURA / 2) + LARGURA / 4;
         int yInicial = random.nextInt(ALTURA / 2) + ALTURA / 4;
-        gerarCursoDeAgua(xInicial, yInicial, 10); // Comprimento do rio
+        int comprimento = random.nextInt(20) + 20;
+        criarRio(xInicial, yInicial, comprimento);
     }
 
-    private void gerarCursoDeAgua(int x, int y, int comprimento) {
+    private void criarRio(int x, int y, int comprimento) {
         if (comprimento <= 0 || !estaDentroDosLimites(x, y)) {
             return;
         }
-        grade[x][y] = new Celula(TipoTerreno.RIO, Recurso.AGUA, 0);
-        int direcaoX = random.nextBoolean() ? 1 : -1;
-        int direcaoY = random.nextBoolean() ? 1 : -1;
-        gerarCursoDeAgua(x + direcaoX, y + direcaoY, comprimento - 1);
+
+        // Verifica se a célula já tem um rio
+        if (grade[x][y].getTerreno() != TipoTerreno.RIO) {
+            grade[x][y] = new Celula(TipoTerreno.RIO, Recurso.AGUA, 0);
+        }
+
+        // Escolhe uma direção aleatória
+        int[] direcoesX = {-1, 0, 1, 0};
+        int[] direcoesY = {0, -1, 0, 1};
+
+        int proximaDirecao = random.nextInt(direcoesX.length);
+        criarRio(x + direcoesX[proximaDirecao], y + direcoesY[proximaDirecao], comprimento - 1);
     }
 
     public Celula getCelula(int x, int y) {
