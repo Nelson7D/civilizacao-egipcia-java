@@ -25,13 +25,10 @@ public class Celula {
         this.unidades = new ArrayList<>();
     }
 
-    // Métodos para adicionar/remover unidades
-    public boolean adicionarUnidade(Unidade unidade) {
+    public void adicionarUnidade(Unidade unidade) {
         if (unidades.size() < maxUnidadesPorCelula) {
             unidades.add(unidade);
-            return true;
         }
-        return false;
     }
 
     public void removerUnidade(Unidade unidade) {
@@ -56,6 +53,11 @@ public class Celula {
             System.out.println("A célula já contém um edifício!");
         }
     }
+    public void removerEdificio() {
+        this.edificio = null;
+    }
+
+
 
     public TipoTerreno getTerreno() {return terreno;}
     public void setTerreno(TipoTerreno terreno) {this.terreno = terreno;}

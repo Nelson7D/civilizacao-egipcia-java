@@ -37,7 +37,7 @@ public class Jogador {
     }
 
     public boolean gastarRecurso(Recurso tipo, int quantidade) {
-        if (recursos.get(tipo) >= quantidade) {
+        if (recursos.containsKey(tipo) && recursos.get(tipo) >= quantidade) {
             recursos.put(tipo, recursos.get(tipo) - quantidade);
             return true;
         }
@@ -78,6 +78,7 @@ public class Jogador {
             if (gastarRecurso(unidade.getRecursoNecessario(), unidade.getCustoRecurso())) {
                 unidades.add(unidade);
                 populacaoUsada += unidade.getCustoPopulacao();
+                mapa.adicionarUnidadeAoMapa(unidade, unidade.getX(), unidade.getY());
                 System.out.println("Unidade criada: " + unidade.getClass().getSimpleName());
                 return true;
             }

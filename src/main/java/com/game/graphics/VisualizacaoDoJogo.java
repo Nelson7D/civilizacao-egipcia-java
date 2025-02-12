@@ -3,10 +3,12 @@ package com.game.graphics;
 import com.game.core.Jogador;
 import com.game.map.MapaDoJogo;
 import com.game.map.Celula;
+import com.game.units.Trabalhador;
 import com.game.units.Unidade;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -16,6 +18,7 @@ import javafx.scene.canvas.GraphicsContext;
 public class VisualizacaoDoJogo extends Application {
     private MapaDoJogo mapa;
     private Jogador jogador;
+    private Unidade unidadeSelecionada;
 
 /*
 * Combate entre Edifícios e Unidades:
@@ -36,9 +39,7 @@ IA Simples:
         Pane root = new Pane();
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-
         root.getChildren().add(canvas);
-
 
         Scene scene = new Scene(root, 800, 600);
         palcoPrincipal.setTitle("Civilização Egípcia");
@@ -47,29 +48,51 @@ IA Simples:
 
 
         // Inicia o AnimationTimer para renderização contínua
-        new AnimationTimer() {
+        AnimationTimer animationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 renderizarMapa(gc);
             }
-        }.start();
-        // Adiciona evento de clique para interação
-        root.setOnMouseClicked(event -> {
-            int tileWidth = 16;
-            int tileHeight = 16;
-            int x = (int) (event.getX() / tileWidth);
-            int y = (int) (event.getY() / tileHeight);
+        };
+        animationTimer.start();
 
-            if (mapa.estaDentroDosLimites(x, y)) {
-                Celula celulaClicada = mapa.getCelula(x, y);
-                if (celulaClicada.getUnidades() instanceof Unidade) {
-                    System.out.println("Unidade selecionada!");
-                } else {
-                    System.out.println("Coordenadas clicadas: (" + x + ", " + y + ")");
+        // Adiciona evento de clique para interação
+        root.setOnMouseClicked(this::handleMouseClick);
+    }
+    private void handleMouseClick(MouseEvent event) {
+        int tileWidth = 16;
+        int tileHeight = 16;
+
+        // Calcula as coordenadas da célula clicada
+        int x = (int) (event.getX() / tileWidth);
+        int y = (int) (event.getY() / tileHeight);
+
+        if (!mapa.estaDentroDosLimites(x, y)) {
+            System.out.println("Coordenadas fora dos limites do mapa!");
+            return;
+        }
+
+        Celula celulaClicada = mapa.getCelula(x, y);
+
+        // Se nenhuma unidade estiver selecionada, tenta selecionar uma unidade
+        if (unidadeSelecionada == null) {
+            for (Unidade unidade : celulaClicada.getUnidades()) {
+                if (unidade instanceof Trabalhador) {
+                    unidadeSelecionada = unidade;
+                    System.out.println("Trabalhador selecionado!");
+                    return;
                 }
             }
-        });
+        }
+        // Se uma unidade estiver selecionada, define o destino para movimento
+        else if (unidadeSelecionada != null && !celulaClicada.isOcupadaPorUnidades()) {
+            unidadeSelecionada.mover(x, y);
+            unidadeSelecionada = null; // Deseleciona após definir o destino
+        } else {
+            System.out.println("Célula ocupada ou fora dos limites!");
+        }
     }
+
 
 
 
