@@ -38,13 +38,23 @@ public class Trabalhador extends Unidade {
     }
 
     @Override
-    public void mover(int newX, int newY) {
-        // Implementação realista (ex: verificar colisões)
-        if (mapa.estaDentroDosLimites(newX, newY) && !mapa.getCelula(newX, newY).isOcupada()) {
-            mapa.getCelula(x, y).setOcupada(false);
+    public void mover(int newX, int newY){
+        if (mapa.estaDentroDosLimites(newX, newY) && mapa.podeAdicionarUnidade(newX, newY)) {
+            Celula celulaAtual = mapa.getCelula(x, y);
+            Celula celulaDestino = mapa.getCelula(newX, newY);
+
+            // Remove a unidade da célula atual
+            if (celulaAtual != null) {
+                celulaAtual.removerUnidade(this);
+            }
+
+            // Adiciona a unidade à célula destino
+            if (celulaDestino != null) {
+                celulaDestino.adicionarUnidade(this);
+            }
+
             this.x = newX;
             this.y = newY;
-            mapa.getCelula(x, y).setOcupada(true);
         }
     }
 
@@ -56,7 +66,7 @@ public class Trabalhador extends Unidade {
         }
 
         Celula celulaDestino = mapa.getCelula(destinoX, destinoY);
-        if (celulaDestino.isOcupada()) {
+        if (celulaDestino.isOcupadaPorUnidades()) {
             System.out.println("Célula ocupada!");
             return;
         }
@@ -74,18 +84,18 @@ public class Trabalhador extends Unidade {
         if (x != destinoX) {
             int dx = Integer.compare(destinoX, x);
             int novoX = x + dx;
-            if (mapa.estaDentroDosLimites(novoX, y) && !mapa.getCelula(novoX, y).isOcupada()) {
-                mapa.getCelula(x, y).setOcupada(false);
+            if (mapa.estaDentroDosLimites(novoX, y) && !mapa.getCelula(novoX, y).isOcupadaPorUnidades()) {
+                mapa.getCelula(x, y).removerUnidade(this);
                 x = novoX;
-                mapa.getCelula(x, y).setOcupada(true);
+                mapa.getCelula(x, y).adicionarUnidade(this);
             }
         } else if (y != destinoY) {
             int dy = Integer.compare(destinoY, y);
             int novoY = y + dy;
-            if (mapa.estaDentroDosLimites(x, novoY) && !mapa.getCelula(x, novoY).isOcupada()) {
-                mapa.getCelula(x, y).setOcupada(false);
+            if (mapa.estaDentroDosLimites(x, novoY) && !mapa.getCelula(x, novoY).isOcupadaPorUnidades()) {
+                mapa.getCelula(x, y).removerUnidade(this);
                 y = novoY;
-                mapa.getCelula(x, y).setOcupada(true);
+                mapa.getCelula(x, y).adicionarUnidade(this);
             }
         }
 

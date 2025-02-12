@@ -1,11 +1,13 @@
 package com.game.map;
 
 import com.game.core.Recurso;
+import com.game.units.Unidade;
+
 import java.util.Random;
 
 public class MapaDoJogo {
-    private static final int LARGURA = 50;
-    private static final int ALTURA = 50;
+    private static final int LARGURA = 150;
+    private static final int ALTURA = 150;
     private Celula[][] grade;
     private Random random;
 
@@ -82,6 +84,25 @@ public class MapaDoJogo {
 
     public boolean estaDentroDosLimites(int x, int y) {
         return x >= 0 && x < LARGURA && y >= 0 && y < ALTURA;
+    }
+
+    public boolean podeAdicionarUnidade(int x, int y) {
+        Celula celula = getCelula(x, y);
+        return celula != null && !celula.isCompletamenteOcupada();
+    }
+
+    public void adicionarUnidadeAoMapa(Unidade unidade, int x, int y) {
+        Celula celula = getCelula(x, y);
+        if (celula != null) {
+            celula.adicionarUnidade(unidade);
+        }
+    }
+
+    public void removerUnidadeDoMapa(Unidade unidade, int x, int y) {
+        Celula celula = getCelula(x, y);
+        if (celula != null) {
+            celula.removerUnidade(unidade);
+        }
     }
 
     // Getters para largura e altura

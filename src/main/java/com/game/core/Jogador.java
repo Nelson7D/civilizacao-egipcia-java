@@ -2,6 +2,7 @@ package com.game.core;
 
 import com.game.core.Recurso;
 import com.game.map.MapaDoJogo;
+import com.game.map.buildings.Casa;
 import com.game.map.buildings.Edificio;
 import com.game.units.Unidade;
 import java.util.ArrayList;
@@ -43,12 +44,16 @@ public class Jogador {
         return false;
     }
     public boolean construirEdificio(Edificio edificio, int x, int y) {
+        if (mapa == null) {System.out.println("Erro: O mapa não foi inicializado!");return false;}
         if (temRecursosParaConstruir(edificio)) {
-            if (mapa.estaDentroDosLimites(x, y) && !mapa.getCelula(x, y).isOcupada()) {
+            if (mapa.estaDentroDosLimites(x, y) && !mapa.getCelula(x, y).isOcupadaPorEdificio()) {
                 for (Map.Entry<Recurso, Integer> requisito : edificio.getCustoConstrucao().entrySet()) {
                     gastarRecurso(requisito.getKey(), requisito.getValue());
                 }
-                System.out.println("Edifício construído: " + edificio.getClass().getSimpleName());
+                if (edificio instanceof Casa) {((Casa) edificio).setJogador(this);}
+                mapa.getCelula(x, y).setEdificio(edificio);
+                edificio.construir();
+                mapa.getCelula(x, y).setEdificio(edificio); // Define o edifício como ocupante da célula
                 return true;
             } else {
                 System.out.println("Posição ocupada!");

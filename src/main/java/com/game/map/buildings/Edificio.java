@@ -19,9 +19,9 @@ public abstract class Edificio {
         this.custoPopulacao = custoPopulacao;
     }
 
+
     public abstract void construir(); // Lógica de construção
     public abstract void destruir();  // Lógica de destruição
-
     // Getters
     public int getSaude() { return saude; }
     public Map<Recurso, Integer> getCustoConstrucao() { return custoConstrucao; }

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Quartel extends Edificio {
+    private Jogador jogador;
+
     public Quartel(int x, int y) {
         super(x, y);
         this.saude = 300;
@@ -17,7 +19,6 @@ public class Quartel extends Edificio {
     @Override
     public void construir() {
         System.out.println("Quartel construído!");
-        // Lógica adicional pode ser adicionada aqui
     }
 
     @Override
@@ -33,4 +34,9 @@ public class Quartel extends Edificio {
         System.out.println("Recursos insuficientes para treinar soldado.");
         return false;
     }
+
+    public void setJogador(Jogador jogador) {
+        this.jogador = jogador;
+    }
+
 }

@@ -1,10 +1,12 @@
 package com.game.map.buildings;
 
+import com.game.core.Jogador;
 import com.game.core.Recurso;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Casa extends Edificio {
+    private Jogador jogador;
+
     public Casa(int x, int y) {
         super(x, y);
         this.saude = 200;
@@ -16,14 +18,18 @@ public class Casa extends Edificio {
     @Override
     public void construir() {
         System.out.println("Casa construída!");
-        // Lógica para aumentar a capacidade populacional do jogador
-        if (jogador != null) {
-            jogador.aumentarCapacidadePopulacao(3); // Aumenta em +3
-        }
+        if (jogador != null) {jogador.aumentarCapacidadePopulacao(3);}
     }
+
 
     @Override
     public void destruir() {
         System.out.println("Casa destruída!");
+        if (jogador != null) {
+            jogador.aumentarCapacidadePopulacao(-3); // Diminui a capacidade populacional em -3
+        }
+    }
+
+    public void setJogador(Jogador jogador) {
     }
 }

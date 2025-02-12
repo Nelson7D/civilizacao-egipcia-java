@@ -40,7 +40,7 @@ public class Game {
             for (int y = 0; y < mapa.getAltura(); y++) {
                 for (int x = 0; x < mapa.getLargura(); x++) {
                     Celula celula = mapa.getCelula(x, y);
-                    if (celula == null || celula.getOcupante() == null) {
+                    if (celula == null || celula.getUnidades() == null) {
                         System.out.print(".");
                     } else {
                         System.out.print("W"); // Representa uma unidade ("Worker")
